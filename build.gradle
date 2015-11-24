@@ -1,0 +1,53 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'maven'
+
+group = 'com.addhen'
+description = """ Rule Engine """
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+    jcenter()
+}
+
+sourceSets {
+    examples {
+        compileClasspath = sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': description, 'Implementation-Version': version
+    }
+}
+
+[compileJava]*.options*.compilerArgs = ['-Xlint:all']
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+targetCompatibility = JavaVersion.VERSION_1_8
+
+
+task wrapper(type: Wrapper) {
+    description 'Creates the gradle wrapper.'
+    gradleVersion '2.7'
+}
+
+def example(name, mainClass) {
+    task(name, dependsOn: ['compileJava', 'compileExamplesJava']) << {
+        javaexec {
+            main = 'com.addhen.rule.engine.example.' + mainClass
+            classpath = sourceSets.main.runtimeClasspath + sourceSets.examples.output
+        }
+    }
+}
+
+example('ruleEngineExample', 'RuleEngineExample')
